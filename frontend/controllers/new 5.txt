@@ -1,0 +1,74 @@
+SELECT * FROM `attendance` WHERE createdDate BETWEEN '2023-09-01' AND '2023-09-23';
+
+SELECT user.username FROM `attendance` INNER JOIN user ON attendance.userId = user.id WHERE createdDate BETWEEN '2023-09-01' AND '2023-09-23';
+
+SELECT user.username,user.email,attendance.corporateName,attendance.shiftStartTime,attendance.shiftEndTime,attendance.createdDate FROM `attendance` INNER JOIN user ON attendance.userId = user.id WHERE createdDate BETWEEN '2023-09-01' AND '2023-09-23';
+
+SELECT user.username,user.email,user.mobile,services.serviceName ,attendance.corporateName,attendance.shiftStartTime,attendance.shiftEndTime,attendance.createdDate FROM `attendance` INNER JOIN user ON attendance.userId = user.id LEFT JOIN services ON services.serviceId = attendance.serviceId WHERE attendance.createdDate BETWEEN '2023-09-01' AND '2023-09-23';
+
+SELECT user.username,user.email,user.mobile,services.serviceName ,attendance.corporateName,attendance.shiftStartTime,attendance.shiftEndTime,Hour(TIMEDIFF(shiftStartTime,shiftEndTime)) as Hour1,Minute(TIMEDIFF(shiftStartTime,shiftEndTime)) as Minute1,attendance.createdDate FROM `attendance` INNER JOIN user ON attendance.userId = user.id LEFT JOIN services ON services.serviceId = attendance.serviceId WHERE attendance.createdDate BETWEEN '2023-09-01' AND '2023-09-30';
+
+SELECT corporatemaster.zone,user.username,user.email,user.mobile,services.serviceName ,attendance.corporateName,attendance.shiftStartTime,attendance.shiftEndTime,Hour(TIMEDIFF(shiftStartTime,shiftEndTime)) as Hour1,Minute(TIMEDIFF(shiftStartTime,shiftEndTime)) as Minute1,attendance.createdDate FROM `attendance` INNER JOIN user ON attendance.userId = user.id LEFT JOIN services ON services.serviceId = attendance.serviceId LEFT JOIN corporatemaster ON corporatemaster.id = attendance.corporateId WHERE (attendance.createdDate BETWEEN '2023-09-01' AND '2023-09-30') AND (zone='WEST') ;
+
+
+SELECT count(atId) FROM `attendance` INNER JOIN user ON attendance.userId = user.id LEFT JOIN services ON services.serviceId = attendance.serviceId LEFT JOIN corporatemaster ON corporatemaster.id = attendance.corporateId WHERE attendance.createdDate ='2023-10-12' ;
+
+
+SELECT count(distinct(userId)) FROM `employees`  LEFT JOIN corporate ON corporate.corporateId = employees.corporateId WHERE corporate.corporateType ='OHC'
+UNION
+SELECT count(distinct(userId)) FROM `employees`  LEFT JOIN corporate ON corporate.corporateId = employees.corporateId WHERE corporate.corporateType ='SC';
+
+SELECT count(atId) FROM `attendance` INNER JOIN user ON attendance.userId = user.id LEFT JOIN services ON services.serviceId = attendance.serviceId LEFT JOIN corporatemaster ON corporatemaster.id = attendance.corporateId LEFT JOIN corporate ON corporate.corporateId = attendance.corporateId WHERE attendance.createdDate ='2023-10-12' AND corporateType="OHC"
+UNION
+SELECT count(atId) FROM `attendance` INNER JOIN user ON attendance.userId = user.id LEFT JOIN services ON services.serviceId = attendance.serviceId LEFT JOIN corporatemaster ON corporatemaster.id = attendance.corporateId LEFT JOIN corporate ON corporate.corporateId = attendance.corporateId WHERE attendance.createdDate ='2023-10-12' AND corporateType="SC";
+
+
+SELECT * 
+FROM ( SELECT count(distinct(userId)) as EmployeesCount
+       FROM employees 
+       LEFT JOIN corporate ON corporate.corporateId = employees.corporateId 
+       WHERE corporateType="OHC"
+       ) AS A
+JOIN ( SELECT count(distinct(atId)) as CheckinCount
+       FROM attendance 
+       INNER JOIN user ON attendance.userId = user.id LEFT JOIN services ON services.serviceId = attendance.serviceId LEFT JOIN corporatemaster ON corporatemaster.id = attendance.corporateId LEFT JOIN corporate ON corporate.corporateId = attendance.corporateId WHERE attendance.createdDate ='2023-10-12' AND corporateType="OHC") AS B
+       
+       UNION
+       
+	SELECT * 
+FROM ( SELECT count(distinct(userId)) as EmployeesCount
+       FROM employees 
+       LEFT JOIN corporate ON corporate.corporateId = employees.corporateId 
+       WHERE corporateType="SC"
+       ) AS A
+JOIN ( SELECT count(distinct(atId)) as CheckinCount
+       FROM attendance 
+       INNER JOIN user ON attendance.userId = user.id LEFT JOIN services ON services.serviceId = attendance.serviceId LEFT JOIN corporatemaster ON corporatemaster.id = attendance.corporateId LEFT JOIN corporate ON corporate.corporateId = attendance.corporateId WHERE attendance.createdDate ='2023-10-12' AND corporateType="SC") AS B
+	    
+	   SELECT * 
+FROM ( SELECT distinct(corporatemaster.zone)
+       FROM employees 
+       LEFT JOIN corporate ON corporate.corporateId = employees.corporateId 
+       LEFT JOIN corporatemaster ON corporatemaster.id = employees.corporateId
+       WHERE corporateType="OHC"
+       ) AS A
+
+SELECT * 
+FROM ( SELECT distinct(corporatemaster.zone)
+       FROM employees 
+       LEFT JOIN corporate ON corporate.corporateId = employees.corporateId 
+       LEFT JOIN corporatemaster ON corporatemaster.id = employees.corporateId
+       WHERE corporateType="SC"
+       ) AS A
+
+
+SELECT * 
+FROM ( SELECT distinct(corporatemaster.zone),count(distinct(userId)) as EmployeesCount
+       FROM employees 
+       LEFT JOIN corporate ON corporate.corporateId = employees.corporateId 
+       LEFT JOIN corporatemaster ON corporatemaster.id = employees.corporateId
+       WHERE corporateType="OHC" GROUP BY zone
+       ) AS A
+
+
+SELECT * FROM ohc.corporate where corporateId IN ('69','72','76','85','86','93','107','108','111','115','112','51','84','63','45','74','80','71','48','77','79','53','59','109','90','98','65','67','43');
